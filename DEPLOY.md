@@ -7,7 +7,7 @@ DoorDarshi runs as one Docker web service: Node serves the app and starts Python
 |---|---|
 | `Dockerfile` | Python 3.12 slim + Node 24 binary + `libgomp1` (needed by LightGBM); installs `requirements-forecast.txt`; listens on `0.0.0.0` |
 | `.dockerignore` | Keeps `.env`, local `.python-deps`, `outputs/`, export folders, logs and unused data out of the image |
-| `render.yaml` | Blueprint: one Docker web service, Singapore, Starter plan, single instance, health check on `/` |
+| `render.yaml` | Blueprint: one Docker web service, Singapore, Free plan (no card needed), single instance, health check on `/` |
 | `requirements-forecast.txt` | Python packages; all pinned versions ship Linux wheels for Python 3.12 |
 
 ## Deploy
@@ -39,8 +39,9 @@ Every push to `main` redeploys automatically.
 
 ## Limits to know
 
-- **State is in memory.** Sessions, consent grants and shared loan plans reset on every deploy or restart. Keep one instance and a plan that does not sleep (Starter or higher); the free plan sleeps and wipes state.
-- **Memory.** Starter has 512 MB; a forecast uses LightGBM on about 13,000 rows, which fits. Move to Standard if forecasts fail with out-of-memory errors in the logs.
+- **Free plan sleeps.** After about 15 idle minutes the service sleeps; the next visit takes 30–60 seconds to wake it. Open the link a few minutes before a demo and run the whole flow in one sitting.
+- **State is in memory.** Sessions, consent grants and shared loan plans reset on every sleep, deploy or restart. For an always-on service, change `plan: free` to `plan: starter` in `render.yaml` (paid; Render asks for a card).
+- **Memory.** The Free plan has 512 MB; a forecast uses LightGBM on about 13,000 rows, which fits. Move to a larger plan if forecasts fail with out-of-memory errors in the logs.
 - **External services** the page and server call: Google Fonts, GTranslate, Open-Meteo, Nager.Date, Gemini, and the Amul logo from shop.amul.com.
 
 ## Before sharing the link publicly

@@ -1,13 +1,14 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
-# One always-on Docker web service. Consent grants, shared plans and sessions live in
-# server memory, so keep a single instance on a plan that does not sleep.
+# One Docker web service on Render's free plan (no card needed). Free services sleep
+# after about 15 idle minutes; consent grants, shared plans and sessions live in server
+# memory and reset when it sleeps. Switch plan to starter for an always-on service.
 services:
   - type: web
     name: doordarshi
     runtime: docker
     dockerfilePath: ./Dockerfile
     region: singapore
-    plan: starter
+    plan: free
     numInstances: 1
     healthCheckPath: /
     autoDeploy: true
