@@ -5,6 +5,8 @@ WORKDIR /app
 COPY requirements-forecast.txt .
 RUN pip install --no-cache-dir -r requirements-forecast.txt
 COPY . .
+# Precompute the sample scenario forecasts with build-time CPU (see warm_forecast_cache.py).
+RUN python warm_forecast_cache.py
 ENV HOST=0.0.0.0 PORT=4173 PYTHON=python
 EXPOSE 4173
 CMD ["node", "server.js"]

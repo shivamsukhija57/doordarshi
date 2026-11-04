@@ -130,6 +130,24 @@ function runForecast(workbookPath, scenario) {
     });
   });
 }
+// Forecasts and inspections are deterministic for the same workbook bytes and scenario
+// (the model uses fixed seeds), so repeat runs reuse a stored result instead of retraining.
+// Results for the bundled sample workbooks are precomputed into forecast-cache/ when the
+// Docker image is built (warm_forecast_cache.py), which matters on small shared CPUs.
+const resultCacheDir = path.join(root, 'forecast-cache');
+const resultCache = new Map();
+function scenarioTag(scenario) {
+  return `h${scenario.heatwave ? 1 : 0}f${scenario.festival ? 1 : 0}p${scenario.promotion ? 1 : 0}`;
+}
+async function cachedResult(key, compute) {
+  if (resultCache.has(key)) return resultCache.get(key);
+  let result;
+  try { result = JSON.parse(await fs.promises.readFile(path.join(resultCacheDir, `${key}.json`), 'utf8')); }
+  catch { result = await compute(); }
+  resultCache.set(key, result);
+  if (resultCache.size > 40) resultCache.delete(resultCache.keys().next().value);
+  return result;
+}
 function runPipelineInspection(workbookPath) {
   return new Promise((resolve, reject) => {
     const python = process.env.PYTHON || 'python';
@@ -472,9 +490,12 @@ http.createServer(async (req, res) => {
     try {
       const bytes = await readBuffer(req);
       if (bytes.length < 100) return send(res, 400, { error: 'The uploaded workbook is empty or invalid.' });
-      tempFile = path.join(os.tmpdir(), `amul-pipeline-${crypto.randomBytes(12).toString('hex')}.xlsx`);
-      await fs.promises.writeFile(tempFile, bytes, { flag: 'wx' });
-      return send(res, 200, await runPipelineInspection(tempFile));
+      const digest = crypto.createHash('sha256').update(bytes).digest('hex');
+      return send(res, 200, await cachedResult(`inspect-${digest}`, async () => {
+        tempFile = path.join(os.tmpdir(), `amul-pipeline-${crypto.randomBytes(12).toString('hex')}.xlsx`);
+        await fs.promises.writeFile(tempFile, bytes, { flag: 'wx' });
+        return runPipelineInspection(tempFile);
+      }));
     } catch (error) {
       const status = error.message.includes('12 MB') ? 413 : 422;
       return send(res, status, { error: error.message || 'Workbook inspection failed.' });
@@ -490,15 +511,18 @@ http.createServer(async (req, res) => {
     try {
       const bytes = await readBuffer(req);
       if (bytes.length < 100) return send(res, 400, { error: 'The uploaded workbook is empty or invalid.' });
-      tempFile = path.join(os.tmpdir(), `amul-forecast-${crypto.randomBytes(12).toString('hex')}.xlsx`);
-      await fs.promises.writeFile(tempFile, bytes, { flag: 'wx' });
       const url = new URL(req.url, 'http://localhost');
       const scenario = {
         heatwave: url.searchParams.get('heatwave') === 'true',
         festival: url.searchParams.get('festival') === 'true',
         promotion: url.searchParams.get('promotion') === 'true',
       };
-      const result = await runForecast(tempFile, scenario);
+      const digest = crypto.createHash('sha256').update(bytes).digest('hex');
+      const result = await cachedResult(`forecast-${digest}-${scenarioTag(scenario)}`, async () => {
+        tempFile = path.join(os.tmpdir(), `amul-forecast-${crypto.randomBytes(12).toString('hex')}.xlsx`);
+        await fs.promises.writeFile(tempFile, bytes, { flag: 'wx' });
+        return runForecast(tempFile, scenario);
+      });
       return send(res, 200, result);
     } catch (error) {
       const status = error.message.includes('12 MB') ? 413 : 422;

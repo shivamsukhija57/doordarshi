@@ -39,6 +39,7 @@ Every push to `main` redeploys automatically.
 
 ## Limits to know
 
+- **Forecast speed.** The free plan has a small share of one CPU, so training LightGBM takes about a minute per run. The image build runs `warm_forecast_cache.py` (about 1–2 minutes) to precompute the five sample scenarios, so those buttons answer instantly; repeats of any run come from memory. New uploads or other switch combinations still train live.
 - **Free plan sleeps.** After about 15 idle minutes the service sleeps; the next visit takes 30–60 seconds to wake it. Open the link a few minutes before a demo and run the whole flow in one sitting.
 - **State is in memory.** Sessions, consent grants and shared loan plans reset on every sleep, deploy or restart. For an always-on service, change `plan: free` to `plan: starter` in `render.yaml` (paid; Render asks for a card).
 - **Memory.** The Free plan has 512 MB; a forecast uses LightGBM on about 13,000 rows, which fits. Move to a larger plan if forecasts fail with out-of-memory errors in the logs.
