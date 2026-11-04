@@ -1,0 +1,22 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# One always-on Docker web service. Consent grants, shared plans and sessions live in
+# server memory, so keep a single instance on a plan that does not sleep.
+services:
+  - type: web
+    name: doordarshi
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore
+    plan: starter
+    numInstances: 1
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_TEXT_MODEL
+        value: gemini-3.8-flash
+      - key: GEMINI_TTS_MODEL
+        value: gemini-3.8-flash-tts
+      - key: GEMINI_FALLBACK_MODELS
+        value: gemini-3.5-flash,gemini-3.5-flash-lite
