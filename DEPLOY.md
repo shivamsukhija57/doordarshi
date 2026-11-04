@@ -16,7 +16,7 @@ DoorDarshi runs as one Docker web service: Node serves the app and starts Python
 2. In Render: **New → Blueprint**, pick the repository. Render reads `render.yaml`.
 3. When asked, enter `GEMINI_API_KEY` (message drafts, audio, bank analysis and chat).
    Without it the app still runs, using labelled local fallbacks.
-4. Click **Apply**. The first build takes about 5–10 minutes.
+4. Click **Apply**. The first build takes about 15–20 minutes, including the precomputed forecasts.
 5. Open the `https://doordarshi-….onrender.com` link when the service is **Live**.
 
 Every push to `main` redeploys automatically.
@@ -39,7 +39,7 @@ Every push to `main` redeploys automatically.
 
 ## Limits to know
 
-- **Forecast speed.** The free plan has a small share of one CPU, so training LightGBM takes about a minute per run. The image build runs `warm_forecast_cache.py` (about 1–2 minutes) to precompute the five sample scenarios, so those buttons answer instantly; repeats of any run come from memory. New uploads or other switch combinations still train live.
+- **Forecast speed.** The free plan has a small share of one CPU, so training LightGBM takes about a minute per run. The image build runs `warm_forecast_cache.py` to precompute all ten sample scenarios (about 1–2 minutes for the five standard workbooks, plus about 5–10 minutes for the five larger metro workbooks), so those buttons answer instantly. The sample buttons name a bundled file instead of uploading it, so they transfer no workbook. Repeats of any run come from memory. New uploads still train live; a metro-sized upload takes about 40 seconds locally and can take several minutes on the Free plan.
 - **Free plan sleeps.** After about 15 idle minutes the service sleeps; the next visit takes 30–60 seconds to wake it. Open the link a few minutes before a demo and run the whole flow in one sitting.
 - **State is in memory.** Sessions, consent grants and shared loan plans reset on every sleep, deploy or restart. For an always-on service, change `plan: free` to `plan: starter` in `render.yaml` (paid; Render asks for a card).
 - **Memory.** The Free plan has 512 MB; a forecast uses LightGBM on about 13,000 rows, which fits. Move to a larger plan if forecasts fail with out-of-memory errors in the logs.

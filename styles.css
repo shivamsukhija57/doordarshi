@@ -272,3 +272,6 @@ svg text{font-size:12px}
 .channel-view-tab:focus-visible{outline:3px solid color-mix(in srgb,var(--red) 45%,transparent);outline-offset:2px}
 .channel-section-panel[hidden]{display:none!important}
 @media(max-width:600px){.qcom-filter-actions{grid-column:1/-1}.channel-view-toggle{width:100%}.channel-view-tab{flex:1;padding:9px 8px}}
+
+.society-overview{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(270px,.9fr);gap:14px;margin:14px 0}.society-overview-main{display:grid;min-width:0}.society-overview-main>.panel{display:flex;flex-direction:column;margin:0}.society-overview-main .action-bar{margin-top:auto}.society-overview-side{display:flex;flex-direction:column;gap:14px;min-width:0}.society-overview-side>.panel{flex:1 1 auto;margin:0}
+@media(max-width:1080px){.society-overview{grid-template-columns:1fr}}

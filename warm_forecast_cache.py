@@ -27,6 +27,13 @@ SAMPLES = {
     "03_festival.xlsx": [(False, True, False), DEFAULT],
     "04_promotions.xlsx": [(False, False, True), DEFAULT],
     "05_combined.xlsx": [(True, True, True), DEFAULT],
+    # The metro workbooks are about six times larger, so only each button's own scenario is
+    # precomputed, which keeps the image build short.
+    "06_metro_baseline.xlsx": [(False, False, False)],
+    "07_metro_heatwave.xlsx": [(True, False, False)],
+    "08_metro_festival.xlsx": [(False, True, False)],
+    "09_metro_promotions.xlsx": [(False, False, True)],
+    "10_metro_combined.xlsx": [(True, True, True)],
 }
 
 
