@@ -1,0 +1,9 @@
+.python-deps/
+__pycache__/
+.env
+outputs/
+.chrome-export-profile/
+.ui-export-preview/
+.sheet_work/
+.impeccable/
+*.log

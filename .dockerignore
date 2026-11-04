@@ -1,0 +1,11 @@
+.git
+.python-deps
+outputs
+.chrome-export-profile
+.ui-export-preview
+.sheet_work
+.impeccable
+__pycache__
+.env
+*.log
+*.xlsx.inspect.ndjson
